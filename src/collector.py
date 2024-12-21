@@ -390,18 +390,38 @@ class CryptoDataCollector:
 
             # Initialize quality monitor if needed
             await self.initialize_quality_monitor(symbol, self.current_timeframe)
-            
+        
             # Add metrics to history
             self.quality_monitor.add_metrics(symbol, self.current_timeframe, {
                 'volume': volume,
                 'trades': num_trades
             })
             
-            # Get enhanced validation results
+            # Get validation results (now synchronous)
             is_valid, warnings, metrics = self.quality_monitor.validate_data(
                 symbol, 
                 self.current_timeframe,
                 {'volume': volume, 'trades': num_trades}
+            )
+            
+            # If we got a simple info message
+            if len(warnings) == 1 and isinstance(warnings[0], str):
+                self.logger.info(warnings[0])
+                return True
+            
+            # Save metrics to database (moved from quality monitor)
+            if metrics and metrics.get('baseline_complete'):
+                # Get thresholds
+                thresholds = self.quality_monitor.get_validation_thresholds(
+                    symbol, 
+                    self.current_timeframe
+                )
+            
+            await self.db.save_validation_metrics(
+                symbol,
+                self.current_timeframe,
+                metrics,
+                thresholds
             )
             
             # Log warnings with severity
@@ -409,13 +429,7 @@ class CryptoDataCollector:
                 if isinstance(warning, dict):
                     level = logging.ERROR if warning['severity'] == 'high' else logging.WARNING
                     self.logger.log(level, f"{symbol} {self.current_timeframe}: {warning['message']}")
-                else:
-                    self.logger.info(warning)  # For "Building baseline" message
-            
-            # Store metrics for analysis
-            if metrics:
-                await self.db.save_validation_metrics(symbol, self.current_timeframe, metrics)
-            
+
             return is_valid
             
         except (IndexError, ValueError, TypeError) as e:

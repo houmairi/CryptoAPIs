@@ -63,9 +63,25 @@ CREATE TABLE IF NOT EXISTS invalid_data (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
+CREATE TABLE IF NOT EXISTS validation_metrics (
+    id SERIAL PRIMARY KEY,
+    symbol VARCHAR(20) NOT NULL,
+    timeframe VARCHAR(10) NOT NULL,
+    timestamp TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    volume_actual NUMERIC(24,8),
+    volume_threshold NUMERIC(24,8),
+    volume_deficit NUMERIC(10,2),
+    trades_actual INTEGER,
+    trades_threshold INTEGER,
+    trades_deficit NUMERIC(10,2),
+    baseline_complete BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(symbol, timeframe, timestamp)
+);
 
 -- Create indexes
 CREATE INDEX IF NOT EXISTS idx_price_ticks_timestamp ON price_ticks(timestamp);
 CREATE INDEX IF NOT EXISTS idx_price_ticks_coin_timestamp ON price_ticks(coin_id, timestamp);
 CREATE INDEX IF NOT EXISTS idx_coins_symbol ON coins(symbol);
 CREATE INDEX IF NOT EXISTS idx_ohlcv_coin_time ON ohlcv_data(coin_id, timestamp);
+CREATE INDEX IF NOT EXISTS idx_validation_metrics_symbol_time ON validation_metrics(symbol, timeframe, timestamp);

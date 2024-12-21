@@ -5,6 +5,7 @@ import logging
 import asyncio
 import os
 import json
+from typing import List, Dict, Tuple, Optional
 
 class DatabaseHandler:
     def __init__(self, config):
@@ -358,3 +359,86 @@ class DatabaseHandler:
         except Exception as e:
             self.logger.error(f"Error saving invalid data: {e}")
             raise
+        
+    async def save_validation_metrics(self, symbol: str, timeframe: str, metrics: dict, thresholds: dict):
+        """Save validation metrics for analysis"""
+        try:
+            def db_operation():
+                self.connect()
+                with self.conn.cursor() as cur:
+                    cur.execute("""
+                        INSERT INTO validation_metrics (
+                            symbol, 
+                            timeframe, 
+                            volume_actual,
+                            volume_threshold,
+                            volume_deficit,
+                            trades_actual,
+                            trades_threshold,
+                            trades_deficit,
+                            baseline_complete
+                        ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+                    """, (
+                        symbol,
+                        timeframe,
+                        metrics.get('volume', 0),
+                        thresholds.get('volume', 0),
+                        metrics.get('volume_deficit'),
+                        metrics.get('trades', 0),
+                        thresholds.get('trades', 0),
+                        metrics.get('trades_deficit'),
+                        metrics.get('baseline_complete', False)
+                    ))
+
+            # Run database operation in thread pool
+            loop = asyncio.get_event_loop()
+            await loop.run_in_executor(None, db_operation)
+            
+            self.logger.debug(f"Saved validation metrics for {symbol} {timeframe}")
+            
+        except Exception as e:
+            self.logger.error(f"Error saving validation metrics: {e}")
+
+    async def get_validation_metrics(
+        self, 
+        symbol: str, 
+        timeframe: str, 
+        start_time: datetime,
+        end_time: datetime = None
+    ) -> List[dict]:
+        """
+        Retrieve validation metrics for analysis
+        
+        Args:
+            symbol: Trading pair symbol
+            timeframe: Data timeframe
+            start_time: Start of time range
+            end_time: End of time range (defaults to current time)
+        """
+        try:
+            if end_time is None:
+                end_time = datetime.now()
+                
+            query = """
+                SELECT 
+                    timestamp,
+                    volume_actual,
+                    volume_threshold,
+                    volume_deficit,
+                    trades_actual,
+                    trades_threshold,
+                    trades_deficit,
+                    baseline_complete
+                FROM validation_metrics
+                WHERE symbol = $1 
+                    AND timeframe = $2
+                    AND timestamp BETWEEN $3 AND $4
+                ORDER BY timestamp ASC
+            """
+            
+            rows = await self.pool.fetch(query, symbol, timeframe, start_time, end_time)
+            return [dict(row) for row in rows]
+            
+        except Exception as e:
+            self.logger.error(f"Error retrieving validation metrics: {e}")
+            return []

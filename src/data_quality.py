@@ -53,6 +53,14 @@ class DataQualityMonitor:
             if len(self.metrics_history[symbol][timeframe][metric]) > max_history:
                 self.metrics_history[symbol][timeframe][metric].pop(0)
                 
+        # Track and log progress
+        progress = len(self.metrics_history[symbol][timeframe]['volume'])
+        if progress % 10 == 0:  # Log every 10 data points
+            self.logger.info(
+                f"Building baseline for {symbol} {timeframe}: "
+                f"{progress}/{self.min_data_points} data points"
+            )
+                
         self._update_statistics(symbol, timeframe)
         
     def _update_statistics(self, symbol: str, timeframe: str):
@@ -81,65 +89,108 @@ class DataQualityMonitor:
         except Exception as e:
             self.logger.error(f"Error updating statistics: {e}")
             
-    def get_validation_thresholds(self, symbol: str, timeframe: str) -> Tuple[float, float]:
-        """Get dynamic thresholds based on historical data"""
+    def get_validation_thresholds(self, symbol: str, timeframe: str) -> Dict:
+        """Enhanced threshold calculation with more detail"""
         stats = self.statistics.get(symbol, {}).get(timeframe)
         
         if not stats:
-            return None, None
+            return None
             
         # Check if we have enough data points
-        if len(self.metrics_history[symbol][timeframe]['volume']) < self.min_data_points:
-            return None, None
-            
-        # Use percentile instead of standard deviation
-        min_volume = np.percentile(self.metrics_history[symbol][timeframe]['volume'], 
-                                 self.percentile_threshold)
-        min_trades = np.percentile(self.metrics_history[symbol][timeframe]['trades'], 
-                                 self.percentile_threshold)
+        metrics = self.metrics_history[symbol][timeframe]
+        has_baseline = len(metrics['volume']) >= self.min_data_points
         
-        # Add time-based adjustment
+        if not has_baseline:
+            return {
+                'baseline_complete': False,
+                'volume': None,
+                'trades': None
+            }
+            
+        # Calculate thresholds
+        min_volume = np.percentile(metrics['volume'], self.percentile_threshold)
+        min_trades = np.percentile(metrics['trades'], self.percentile_threshold)
+        
+        # Apply time-based adjustments
         hour = datetime.now().hour
         if 0 <= hour < 8:  # During low activity hours
             min_volume *= 0.5
             min_trades *= 0.5
-            
-        return min_volume, min_trades
         
+        return {
+            'baseline_complete': True,
+            'volume': min_volume,
+            'trades': min_trades
+        }
+
     def validate_data(self, symbol: str, timeframe: str, data: dict) -> Tuple[bool, List[str], Dict]:
-        """Enhanced validation with severity levels"""
+        """Synchronous validation with detailed metrics"""
         warnings = []
         metrics = {}
         volume = float(data.get('volume', 0))
         trades = int(data.get('trades', 0))
         
-        min_volume, min_trades = self.get_validation_thresholds(symbol, timeframe)
+        thresholds = self.get_validation_thresholds(symbol, timeframe)
         
-        if min_volume is None or min_trades is None:
-            return True, ["Building baseline statistics..."], {}
+        if not thresholds:
+            return True, ["Initializing validation metrics..."], {}
             
-        # Calculate how far below threshold we are (as percentage)
-        if volume < min_volume:
-            volume_deficit = ((min_volume - volume) / min_volume) * 100
-            severity = 'high' if volume_deficit > 50 else 'medium'
+        metrics.update({
+            'volume': volume,
+            'trades': trades,
+            'baseline_complete': thresholds['baseline_complete']
+        })
+        
+        if not thresholds['baseline_complete']:
+            return True, ["Building baseline statistics..."], metrics
+            
+        # Calculate deficits and add to metrics
+        if volume < thresholds['volume']:
+            volume_deficit = ((thresholds['volume'] - volume) / thresholds['volume']) * 100
             metrics['volume_deficit'] = volume_deficit
+            
+            # More nuanced validation levels for volume
+            if volume < thresholds['volume'] * 0.5:  # Below 50%
+                severity = 'high'
+            elif volume < thresholds['volume'] * 0.75:  # Below 75%
+                severity = 'medium'
+            else:  # Below 100%
+                severity = 'low'
+                
             warnings.append({
                 'type': 'low_volume',
                 'severity': severity,
-                'message': f"Volume ({volume:.2f}) {volume_deficit:.1f}% below historical minimum ({min_volume:.2f})"
+                'message': f"Volume ({volume:.2f}) {volume_deficit:.1f}% below threshold ({thresholds['volume']:.2f})"
             })
-            
-        if trades < min_trades:
-            trades_deficit = ((min_trades - trades) / min_trades) * 100
-            severity = 'high' if trades_deficit > 50 else 'medium'
+        
+        if trades < thresholds['trades']:
+            trades_deficit = ((thresholds['trades'] - trades) / thresholds['trades']) * 100
             metrics['trades_deficit'] = trades_deficit
+            
+            # More nuanced validation levels for trades
+            if trades < thresholds['trades'] * 0.5:  # Below 50%
+                severity = 'high'
+            elif trades < thresholds['trades'] * 0.75:  # Below 75%
+                severity = 'medium'
+            else:  # Below 100%
+                severity = 'low'
+                
             warnings.append({
                 'type': 'low_trades',
                 'severity': severity,
-                'message': f"Trade count ({trades}) {trades_deficit:.1f}% below historical minimum ({min_trades:.0f})"
+                'message': f"Trades ({trades}) {trades_deficit:.1f}% below threshold ({thresholds['trades']:.0f})"
             })
             
-        # Consider data valid if deficits are not too severe
-        is_valid = all(w['severity'] != 'high' for w in warnings)
+            is_valid = all(w['severity'] != 'high' for w in warnings if isinstance(w, dict))
         
-        return is_valid, warnings, metrics
+            return is_valid, warnings, metrics
+    
+    def get_baseline_threshold(self, current_value: float) -> float:
+        """More flexible threshold calculation"""
+        # Start at 60% of original threshold, gradually increase
+        if self.baseline_progress < 50:  # First 50 data points
+            return current_value * 0.6
+        elif self.baseline_progress < 100:  # Next 50 points
+            return current_value * 0.8
+        else:
+            return current_value
