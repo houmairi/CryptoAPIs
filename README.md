@@ -14,6 +14,13 @@ This project implements a comprehensive cryptocurrency data collection system th
   - Metadata updates from CoinGecko
   - Currently tracking: BTC, ETH, BNB, SOL
 
+- **Data Quality Monitoring**
+  - Dynamic threshold adjustments
+  - Multi-level severity warnings
+  - Volume and trade validation
+  - Automatic baseline establishment
+  - Debug mode for rapid testing
+
 - **Supported Timeframes**
   - 1 minute
   - 5 minutes
@@ -29,16 +36,16 @@ This project implements a comprehensive cryptocurrency data collection system th
   - Error handling and automatic retry logic
   - Proper connection pooling
   - Minute-aligned data collection
+  - Type-safe database operations
 
 ## System Requirements
 
 - Python 3.8+
 - PostgreSQL 12+
-- Required Python packages:
-  - aiohttp
-  - asyncio
-  - psycopg2
-  - logging
+- Required Python packages (see requirements.txt):
+  - aiohttp==3.9.1
+  - psycopg2-binary==2.9.9
+  - asyncio==3.4.3
 
 ## Project Structure
 
@@ -48,8 +55,9 @@ CryptoAPIs/
 │   ├── __init__.py
 │   ├── database.py      # Database operations
 │   ├── collector.py     # Data collection logic
-│   └── config.py        # Configuration settings
+│   └── data_quality.py  # Data validation system
 ├── schema.sql          # Database schema
+├── config_template.py  # Configuration template
 ├── main.py            # Entry point
 ├── requirements.txt    # Dependencies
 └── README.md
@@ -61,12 +69,13 @@ CryptoAPIs/
 - **price_ticks**: High-frequency price and volume data
 - **coin_metadata**: Detailed coin information and updates
 - **ohlcv_data**: Candlestick data at different timeframes
+- **validation_metrics**: Data quality tracking and validation history
 
 ## Installation
 
 1. Clone the repository:
 ```bash
-git clone [repository-url]
+git clone https://github.com/houmairi/CryptoAPIs
 cd CryptoAPIs
 ```
 
@@ -92,6 +101,12 @@ CREATE DATABASE crypto_db;
 psql -U postgres -d crypto_db -f schema.sql
 ```
 
+6. Configure your settings:
+```bash
+cp config_template.py config.py
+# Edit config.py with your settings
+```
+
 ## Configuration
 
 Update `config.py` with your settings:
@@ -99,19 +114,45 @@ Update `config.py` with your settings:
 - API configurations
 - Collection intervals
 - Tracked symbols
+- Validation thresholds
 
 ## Usage
 
-Run the collector:
+Regular collection mode:
 ```bash
 python main.py
 ```
 
-Run the Debug Version: 
+Debug mode (faster baseline establishment):
 ```bash
-# Will run the collector with 3 Data Points needed to evaluate threshold instead of 100 Data Points needed
 python main.py --debug
 ```
+
+## Development Mode Features
+
+- Debug flag reduces required baseline data points from 100 to 3
+- Faster quality metric establishment
+- More detailed logging
+- Type-safe database operations
+
+## Data Quality System
+
+The system implements comprehensive data quality monitoring:
+
+- Dynamic thresholds based on:
+  - Time of day
+  - Market activity
+  - Historical patterns
+
+- Validation metrics:
+  - Trade volume
+  - Trade count
+  - Price movement patterns
+
+- Warning severity levels:
+  - High: Critical data quality issues
+  - Medium: Notable anomalies
+  - Low: Minor deviations
 
 ## Future Plans
 
@@ -125,7 +166,7 @@ python main.py --debug
    - Additional cryptocurrencies
    - Order book data collection
    - Market sentiment analysis
-   - Network metrics collection (blockchain data)
+   - Network metrics collection
 
 3. ML Integration
    - Feature engineering pipelines
@@ -134,11 +175,10 @@ python main.py --debug
    - Automated backtesting framework
 
 4. System Improvements
-   - Advanced error recovery
-   - Data validation and cleaning
-   - Performance optimizations
+   - Market cap based threshold adjustments
+   - Enhanced time-of-day adaptations
+   - Monitoring dashboard
    - Data backup solutions
-   - Monitoring and alerting system
 
 ## Contributing
 

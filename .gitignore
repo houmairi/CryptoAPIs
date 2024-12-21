@@ -1,2 +1,6 @@
-venv/
 datafromelsewhere/
+config.py
+*.pyc
+__pycache__/
+venv/
+*.log
