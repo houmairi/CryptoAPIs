@@ -3,13 +3,15 @@ from psycopg2.extras import execute_values
 from datetime import datetime
 import logging
 import asyncio
-from functools import partial
+import os
 
 class DatabaseHandler:
     def __init__(self, config):
         self.config = config['database']
         self.conn = None
         self.setup_logging()
+        self.initialize_database()
+        self.initialize_tracked_coins()
         
     def setup_logging(self):
         logging.basicConfig(
@@ -21,6 +23,40 @@ class DatabaseHandler:
             ]
         )
         self.logger = logging.getLogger(__name__)
+        
+    def initialize_database(self):
+        """Initialize database with schema if tables don't exist"""
+        try:
+            # First try to connect to the database
+            try:
+                self.connect()
+            except psycopg2.OperationalError as e:
+                if "does not exist" in str(e):
+                    # Database doesn't exist, create it
+                    temp_config = self.config.copy()
+                    temp_config['database'] = 'postgres'  # Connect to default postgres database
+                    with psycopg2.connect(**temp_config) as conn:
+                        conn.autocommit = True
+                        with conn.cursor() as cur:
+                            cur.execute(f"CREATE DATABASE {self.config['database']}")
+                    self.connect()
+                else:
+                    raise
+                
+                # Read and execute schema.sql
+            schema_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'schema.sql')
+            with open(schema_path, 'r') as f:
+                schema_sql = f.read()
+                
+            with self.conn.cursor() as cur:
+                cur.execute(schema_sql)
+            
+            self.conn.commit()
+            self.logger.info("Database initialized successfully")
+            
+        except Exception as e:
+            self.logger.error(f"Error initializing database: {e}")
+            raise
     
     def connect(self):
         if not self.conn or self.conn.closed:
@@ -96,7 +132,6 @@ class DatabaseHandler:
             raise
             
     async def save_metadata(self, data, source):
-        """Async wrapper for metadata operations"""
         try:
             def db_operation():
                 self.connect()
@@ -105,8 +140,9 @@ class DatabaseHandler:
                     cur.execute("""
                         INSERT INTO coins (coingecko_id, symbol, name)
                         VALUES (%s, %s, %s)
-                        ON CONFLICT (coingecko_id) DO UPDATE 
-                        SET name = EXCLUDED.name, 
+                        ON CONFLICT (symbol) DO UPDATE 
+                        SET coingecko_id = EXCLUDED.coingecko_id,
+                            name = EXCLUDED.name, 
                             updated_at = CURRENT_TIMESTAMP
                     """, (data['id'], data['symbol'].upper(), data['name']))
                     
@@ -134,4 +170,20 @@ class DatabaseHandler:
                 
         except Exception as e:
             self.logger.error(f"Error saving metadata: {e}")
+            raise
+        
+    def initialize_tracked_coins(self):
+        """Initialize basic entries for all tracked coins"""
+        try:
+            self.connect()
+            with self.conn.cursor() as cur:
+                for symbol in ['BTC', 'ETH', 'BNB', 'SOL']:  # Add all your tracked coins
+                    cur.execute("""
+                        INSERT INTO coins (symbol, name)
+                        VALUES (%s, %s)
+                        ON CONFLICT (symbol) DO NOTHING
+                    """, (symbol, symbol))
+            self.conn.commit()
+        except Exception as e:
+            self.logger.error(f"Error initializing tracked coins: {e}")
             raise

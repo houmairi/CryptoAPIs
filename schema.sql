@@ -1,10 +1,5 @@
--- First, drop existing tables if needed (be careful with this in production!)
--- DROP TABLE IF EXISTS price_ticks CASCADE;
--- DROP TABLE IF EXISTS coin_metadata CASCADE;
--- DROP TABLE IF EXISTS coins CASCADE;
-
 -- Core tables
-CREATE TABLE coins (
+CREATE TABLE IF NOT EXISTS coins (
     id SERIAL PRIMARY KEY,
     symbol VARCHAR(10) NOT NULL,
     name VARCHAR(100) NOT NULL,
@@ -17,7 +12,7 @@ CREATE TABLE coins (
 );
 
 -- Price data with high granularity
-CREATE TABLE price_ticks (
+CREATE TABLE IF NOT EXISTS price_ticks (
     id SERIAL PRIMARY KEY,
     coin_id INTEGER REFERENCES coins(id),
     timestamp TIMESTAMP WITH TIME ZONE NOT NULL,
@@ -31,7 +26,7 @@ CREATE TABLE price_ticks (
 );
 
 -- Metadata updates
-CREATE TABLE coin_metadata (
+CREATE TABLE IF NOT EXISTS coin_metadata (
     id SERIAL PRIMARY KEY,
     coin_id INTEGER REFERENCES coins(id),
     timestamp TIMESTAMP WITH TIME ZONE NOT NULL,
@@ -42,11 +37,24 @@ CREATE TABLE coin_metadata (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
+-- OHLCV data
+CREATE TABLE IF NOT EXISTS ohlcv_data (
+    id SERIAL PRIMARY KEY,
+    coin_id INTEGER REFERENCES coins(id),
+    timestamp TIMESTAMP WITH TIME ZONE NOT NULL,
+    timeframe VARCHAR(10) NOT NULL,
+    open_price NUMERIC(24,8),
+    high_price NUMERIC(24,8),
+    low_price NUMERIC(24,8),
+    close_price NUMERIC(24,8),
+    volume NUMERIC(24,8),
+    num_trades INTEGER,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(coin_id, timestamp, timeframe)
+);
+
 -- Create indexes
-CREATE INDEX idx_price_ticks_timestamp ON price_ticks(timestamp);
-CREATE INDEX idx_price_ticks_coin_timestamp ON price_ticks(coin_id, timestamp);
-CREATE INDEX idx_coins_symbol ON coins(symbol);
-CREATE INDEX idx_ohlcv_coin_time ON ohlcv_data(coin_id, timestamp);
-
-
-
+CREATE INDEX IF NOT EXISTS idx_price_ticks_timestamp ON price_ticks(timestamp);
+CREATE INDEX IF NOT EXISTS idx_price_ticks_coin_timestamp ON price_ticks(coin_id, timestamp);
+CREATE INDEX IF NOT EXISTS idx_coins_symbol ON coins(symbol);
+CREATE INDEX IF NOT EXISTS idx_ohlcv_coin_time ON ohlcv_data(coin_id, timestamp);
