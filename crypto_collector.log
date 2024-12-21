@@ -1,0 +1,206 @@
+2024-12-20 23:52:25,658 - src.database - INFO - Successfully connected to database
+2024-12-20 23:52:25,660 - src.database - ERROR - Error saving ticker data: FEHLER:  ungültige Eingabesyntax für Typ integer: »BTCUSDT«
+LINE 4:                 ) VALUES ('BTCUSDT','2024-12-20T23:52:25.140...
+                                  ^
+
+2024-12-20 23:52:25,660 - src.collector - ERROR - Error in Binance collection: FEHLER:  ungültige Eingabesyntax für Typ integer: »BTCUSDT«
+LINE 4:                 ) VALUES ('BTCUSDT','2024-12-20T23:52:25.140...
+                                  ^
+
+2024-12-20 23:52:25,661 - src.database - ERROR - Error saving ticker data: FEHLER:  ungültige Eingabesyntax für Typ integer: »SOLUSDT«
+LINE 4:                 ) VALUES ('SOLUSDT','2024-12-20T23:52:24.685...
+                                  ^
+
+2024-12-20 23:52:25,662 - src.collector - ERROR - Error in Binance collection: FEHLER:  ungültige Eingabesyntax für Typ integer: »SOLUSDT«
+LINE 4:                 ) VALUES ('SOLUSDT','2024-12-20T23:52:24.685...
+                                  ^
+
+2024-12-20 23:52:25,663 - src.database - ERROR - Error saving ticker data: FEHLER:  ungültige Eingabesyntax für Typ integer: »ETHUSDT«
+LINE 4:                 ) VALUES ('ETHUSDT','2024-12-20T23:52:25.100...
+                                  ^
+
+2024-12-20 23:52:25,663 - src.collector - ERROR - Error in Binance collection: FEHLER:  ungültige Eingabesyntax für Typ integer: »ETHUSDT«
+LINE 4:                 ) VALUES ('ETHUSDT','2024-12-20T23:52:25.100...
+                                  ^
+
+2024-12-20 23:52:25,664 - src.database - ERROR - Error saving ticker data: FEHLER:  ungültige Eingabesyntax für Typ integer: »BNBUSDT«
+LINE 4:                 ) VALUES ('BNBUSDT','2024-12-20T23:52:25.152...
+                                  ^
+
+2024-12-20 23:52:25,664 - src.collector - ERROR - Error in Binance collection: FEHLER:  ungültige Eingabesyntax für Typ integer: »BNBUSDT«
+LINE 4:                 ) VALUES ('BNBUSDT','2024-12-20T23:52:25.152...
+                                  ^
+
+2024-12-20 23:53:25,987 - src.database - ERROR - Error saving ticker data: FEHLER:  ungültige Eingabesyntax für Typ integer: »BNBUSDT«
+LINE 4:                 ) VALUES ('BNBUSDT','2024-12-20T23:53:24.871...
+                                  ^
+
+2024-12-20 23:53:25,987 - src.collector - ERROR - Error in Binance collection: FEHLER:  ungültige Eingabesyntax für Typ integer: »BNBUSDT«
+LINE 4:                 ) VALUES ('BNBUSDT','2024-12-20T23:53:24.871...
+                                  ^
+
+2024-12-20 23:53:25,991 - src.database - ERROR - Error saving ticker data: FEHLER:  ungültige Eingabesyntax für Typ integer: »BTCUSDT«
+LINE 4:                 ) VALUES ('BTCUSDT','2024-12-20T23:53:25.483...
+                                  ^
+
+2024-12-20 23:53:25,991 - src.collector - ERROR - Error in Binance collection: FEHLER:  ungültige Eingabesyntax für Typ integer: »BTCUSDT«
+LINE 4:                 ) VALUES ('BTCUSDT','2024-12-20T23:53:25.483...
+                                  ^
+
+2024-12-20 23:53:25,998 - src.database - ERROR - Error saving ticker data: FEHLER:  ungültige Eingabesyntax für Typ integer: »SOLUSDT«
+LINE 4:                 ) VALUES ('SOLUSDT','2024-12-20T23:53:25.499...
+                                  ^
+
+2024-12-20 23:53:25,998 - src.collector - ERROR - Error in Binance collection: FEHLER:  ungültige Eingabesyntax für Typ integer: »SOLUSDT«
+LINE 4:                 ) VALUES ('SOLUSDT','2024-12-20T23:53:25.499...
+                                  ^
+
+2024-12-20 23:53:25,999 - src.database - ERROR - Error saving ticker data: FEHLER:  ungültige Eingabesyntax für Typ integer: »ETHUSDT«
+LINE 4:                 ) VALUES ('ETHUSDT','2024-12-20T23:53:25.469...
+                                  ^
+
+2024-12-20 23:53:26,000 - src.collector - ERROR - Error in Binance collection: FEHLER:  ungültige Eingabesyntax für Typ integer: »ETHUSDT«
+LINE 4:                 ) VALUES ('ETHUSDT','2024-12-20T23:53:25.469...
+                                  ^
+
+2024-12-20 23:54:26,323 - src.database - ERROR - Error saving ticker data: FEHLER:  ungültige Eingabesyntax für Typ integer: »BTCUSDT«
+LINE 4:                 ) VALUES ('BTCUSDT','2024-12-20T23:54:25.840...
+                                  ^
+
+2024-12-20 23:54:26,324 - src.collector - ERROR - Error in Binance collection: FEHLER:  ungültige Eingabesyntax für Typ integer: »BTCUSDT«
+LINE 4:                 ) VALUES ('BTCUSDT','2024-12-20T23:54:25.840...
+                                  ^
+
+2024-12-20 23:54:26,331 - src.database - ERROR - Error saving ticker data: FEHLER:  ungültige Eingabesyntax für Typ integer: »SOLUSDT«
+LINE 4:                 ) VALUES ('SOLUSDT','2024-12-20T23:54:25.802...
+                                  ^
+
+2024-12-20 23:54:26,332 - src.collector - ERROR - Error in Binance collection: FEHLER:  ungültige Eingabesyntax für Typ integer: »SOLUSDT«
+LINE 4:                 ) VALUES ('SOLUSDT','2024-12-20T23:54:25.802...
+                                  ^
+
+2024-12-20 23:54:26,333 - src.database - ERROR - Error saving ticker data: FEHLER:  ungültige Eingabesyntax für Typ integer: »BNBUSDT«
+LINE 4:                 ) VALUES ('BNBUSDT','2024-12-20T23:54:25.481...
+                                  ^
+
+2024-12-20 23:54:26,333 - src.collector - ERROR - Error in Binance collection: FEHLER:  ungültige Eingabesyntax für Typ integer: »BNBUSDT«
+LINE 4:                 ) VALUES ('BNBUSDT','2024-12-20T23:54:25.481...
+                                  ^
+
+2024-12-20 23:54:27,334 - src.database - ERROR - Error saving ticker data: FEHLER:  ungültige Eingabesyntax für Typ integer: »ETHUSDT«
+LINE 4:                 ) VALUES ('ETHUSDT','2024-12-20T23:54:26.781...
+                                  ^
+
+2024-12-20 23:54:27,335 - src.collector - ERROR - Error in Binance collection: FEHLER:  ungültige Eingabesyntax für Typ integer: »ETHUSDT«
+LINE 4:                 ) VALUES ('ETHUSDT','2024-12-20T23:54:26.781...
+                                  ^
+
+2024-12-20 23:55:27,661 - src.collector - ERROR - Error collecting CoinGecko data: {"error":"coin not found"}
+2024-12-20 23:55:27,662 - src.database - ERROR - Error saving ticker data: FEHLER:  ungültige Eingabesyntax für Typ integer: »BTCUSDT«
+LINE 4:                 ) VALUES ('BTCUSDT','2024-12-20T23:55:27.184...
+                                  ^
+
+2024-12-20 23:55:27,663 - src.collector - ERROR - Error in Binance collection: FEHLER:  ungültige Eingabesyntax für Typ integer: »BTCUSDT«
+LINE 4:                 ) VALUES ('BTCUSDT','2024-12-20T23:55:27.184...
+                                  ^
+
+2024-12-20 23:55:27,664 - src.database - ERROR - Error saving ticker data: FEHLER:  ungültige Eingabesyntax für Typ integer: »ETHUSDT«
+LINE 4:                 ) VALUES ('ETHUSDT','2024-12-20T23:55:27.171...
+                                  ^
+
+2024-12-20 23:55:27,664 - src.collector - ERROR - Error in Binance collection: FEHLER:  ungültige Eingabesyntax für Typ integer: »ETHUSDT«
+LINE 4:                 ) VALUES ('ETHUSDT','2024-12-20T23:55:27.171...
+                                  ^
+
+2024-12-20 23:55:27,878 - src.collector - ERROR - Error collecting CoinGecko data: {"error":"coin not found"}
+2024-12-20 23:55:27,879 - src.collector - ERROR - Error collecting CoinGecko data: {"error":"coin not found"}
+2024-12-20 23:55:27,881 - src.collector - ERROR - Error collecting CoinGecko data: {"error":"coin not found"}
+2024-12-20 23:55:27,944 - src.database - ERROR - Error saving ticker data: FEHLER:  ungültige Eingabesyntax für Typ integer: »SOLUSDT«
+LINE 4:                 ) VALUES ('SOLUSDT','2024-12-20T23:55:27.410...
+                                  ^
+
+2024-12-20 23:55:27,944 - src.collector - ERROR - Error in Binance collection: FEHLER:  ungültige Eingabesyntax für Typ integer: »SOLUSDT«
+LINE 4:                 ) VALUES ('SOLUSDT','2024-12-20T23:55:27.410...
+                                  ^
+
+2024-12-20 23:55:27,946 - src.database - ERROR - Error saving ticker data: FEHLER:  ungültige Eingabesyntax für Typ integer: »BNBUSDT«
+LINE 4:                 ) VALUES ('BNBUSDT','2024-12-20T23:55:27.449...
+                                  ^
+
+2024-12-20 23:55:27,946 - src.collector - ERROR - Error in Binance collection: FEHLER:  ungültige Eingabesyntax für Typ integer: »BNBUSDT«
+LINE 4:                 ) VALUES ('BNBUSDT','2024-12-20T23:55:27.449...
+                                  ^
+
+2024-12-20 23:56:28,268 - src.database - ERROR - Error saving ticker data: FEHLER:  ungültige Eingabesyntax für Typ integer: »BNBUSDT«
+LINE 4:                 ) VALUES ('BNBUSDT','2024-12-20T23:56:27.541...
+                                  ^
+
+2024-12-20 23:56:28,268 - src.collector - ERROR - Error in Binance collection: FEHLER:  ungültige Eingabesyntax für Typ integer: »BNBUSDT«
+LINE 4:                 ) VALUES ('BNBUSDT','2024-12-20T23:56:27.541...
+                                  ^
+
+2024-12-20 23:56:28,270 - src.database - ERROR - Error saving ticker data: FEHLER:  ungültige Eingabesyntax für Typ integer: »ETHUSDT«
+LINE 4:                 ) VALUES ('ETHUSDT','2024-12-20T23:56:27.801...
+                                  ^
+
+2024-12-20 23:56:28,270 - src.collector - ERROR - Error in Binance collection: FEHLER:  ungültige Eingabesyntax für Typ integer: »ETHUSDT«
+LINE 4:                 ) VALUES ('ETHUSDT','2024-12-20T23:56:27.801...
+                                  ^
+
+2024-12-20 23:56:28,283 - src.database - ERROR - Error saving ticker data: FEHLER:  ungültige Eingabesyntax für Typ integer: »SOLUSDT«
+LINE 4:                 ) VALUES ('SOLUSDT','2024-12-20T23:56:27.388...
+                                  ^
+
+2024-12-20 23:56:28,284 - src.collector - ERROR - Error in Binance collection: FEHLER:  ungültige Eingabesyntax für Typ integer: »SOLUSDT«
+LINE 4:                 ) VALUES ('SOLUSDT','2024-12-20T23:56:27.388...
+                                  ^
+
+2024-12-20 23:56:28,728 - src.database - ERROR - Error saving ticker data: FEHLER:  ungültige Eingabesyntax für Typ integer: »BTCUSDT«
+LINE 4:                 ) VALUES ('BTCUSDT','2024-12-20T23:56:28.242...
+                                  ^
+
+2024-12-20 23:56:28,729 - src.collector - ERROR - Error in Binance collection: FEHLER:  ungültige Eingabesyntax für Typ integer: »BTCUSDT«
+LINE 4:                 ) VALUES ('BTCUSDT','2024-12-20T23:56:28.242...
+                                  ^
+
+2024-12-20 23:57:30,157 - src.database - ERROR - Error saving ticker data: FEHLER:  ungültige Eingabesyntax für Typ integer: »ETHUSDT«
+LINE 4:                 ) VALUES ('ETHUSDT','2024-12-20T23:57:29.473...
+                                  ^
+
+2024-12-20 23:57:30,157 - src.collector - ERROR - Error in Binance collection: FEHLER:  ungültige Eingabesyntax für Typ integer: »ETHUSDT«
+LINE 4:                 ) VALUES ('ETHUSDT','2024-12-20T23:57:29.473...
+                                  ^
+
+2024-12-20 23:57:30,158 - src.database - ERROR - Error saving ticker data: FEHLER:  ungültige Eingabesyntax für Typ integer: »BNBUSDT«
+LINE 4:                 ) VALUES ('BNBUSDT','2024-12-20T23:57:29.565...
+                                  ^
+
+2024-12-20 23:57:30,159 - src.collector - ERROR - Error in Binance collection: FEHLER:  ungültige Eingabesyntax für Typ integer: »BNBUSDT«
+LINE 4:                 ) VALUES ('BNBUSDT','2024-12-20T23:57:29.565...
+                                  ^
+
+2024-12-20 23:57:30,160 - src.database - ERROR - Error saving ticker data: FEHLER:  ungültige Eingabesyntax für Typ integer: »BTCUSDT«
+LINE 4:                 ) VALUES ('BTCUSDT','2024-12-20T23:57:29.590...
+                                  ^
+
+2024-12-20 23:57:30,160 - src.collector - ERROR - Error in Binance collection: FEHLER:  ungültige Eingabesyntax für Typ integer: »BTCUSDT«
+LINE 4:                 ) VALUES ('BTCUSDT','2024-12-20T23:57:29.590...
+                                  ^
+
+2024-12-20 23:57:30,162 - src.database - ERROR - Error saving ticker data: FEHLER:  ungültige Eingabesyntax für Typ integer: »SOLUSDT«
+LINE 4:                 ) VALUES ('SOLUSDT','2024-12-20T23:57:29.685...
+                                  ^
+
+2024-12-20 23:57:30,162 - src.collector - ERROR - Error in Binance collection: FEHLER:  ungültige Eingabesyntax für Typ integer: »SOLUSDT«
+LINE 4:                 ) VALUES ('SOLUSDT','2024-12-20T23:57:29.685...
+                                  ^
+
+2024-12-21 00:01:59,241 - src.database - INFO - Successfully connected to database
+2024-12-21 00:01:59,246 - src.database - INFO - Saved ticker data for ETHUSDT
+2024-12-21 00:01:59,247 - src.collector - ERROR - Error in Binance collection: object NoneType can't be used in 'await' expression
+2024-12-21 00:01:59,248 - src.database - INFO - Saved ticker data for SOLUSDT
+2024-12-21 00:01:59,248 - src.collector - ERROR - Error in Binance collection: object NoneType can't be used in 'await' expression
+2024-12-21 00:01:59,249 - src.database - INFO - Saved ticker data for BTCUSDT
+2024-12-21 00:01:59,249 - src.collector - ERROR - Error in Binance collection: object NoneType can't be used in 'await' expression
+2024-12-21 00:01:59,250 - src.database - INFO - Saved ticker data for BNBUSDT
+2024-12-21 00:01:59,250 - src.collector - ERROR - Error in Binance collection: object NoneType can't be used in 'await' expression
