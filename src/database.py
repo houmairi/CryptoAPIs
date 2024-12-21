@@ -187,3 +187,48 @@ class DatabaseHandler:
         except Exception as e:
             self.logger.error(f"Error initializing tracked coins: {e}")
             raise
+        
+    async def save_ohlcv_data(self, symbol, timeframe, data):
+        """Save OHLCV data to database"""
+        try:
+            if not data or len(data) == 0:
+                self.logger.warning(f"No OHLCV data received for {symbol} {timeframe}")
+                return
+                
+            kline = data[0]  # Get first kline since limit=1
+            
+            def db_operation():
+                coin_id = self.get_or_create_coin(symbol)
+                
+                with self.conn.cursor() as cur:
+                    cur.execute("""
+                        INSERT INTO ohlcv_data (
+                            coin_id, timestamp, timeframe, open_price, high_price,
+                            low_price, close_price, volume, num_trades
+                        ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+                        ON CONFLICT (coin_id, timestamp, timeframe) 
+                        DO UPDATE SET
+                            open_price = EXCLUDED.open_price,
+                            high_price = EXCLUDED.high_price,
+                            low_price = EXCLUDED.low_price,
+                            close_price = EXCLUDED.close_price,
+                            volume = EXCLUDED.volume,
+                            num_trades = EXCLUDED.num_trades
+                    """, (
+                        coin_id,
+                        datetime.fromtimestamp(kline[0]/1000),  # Open time
+                        timeframe,
+                        float(kline[1]),  # Open
+                        float(kline[2]),  # High
+                        float(kline[3]),  # Low
+                        float(kline[4]),  # Close
+                        float(kline[5]),  # Volume
+                        int(kline[8])     # Number of trades
+                    ))
+            
+            loop = asyncio.get_event_loop()
+            await loop.run_in_executor(None, db_operation)
+            
+        except Exception as e:
+            self.logger.error(f"Error saving OHLCV data: {e}")
+            raise
