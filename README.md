@@ -107,6 +107,12 @@ Run the collector:
 python main.py
 ```
 
+Run the Debug Version: 
+```bash
+# Will run the collector with 3 Data Points needed to evaluate threshold instead of 100 Data Points needed
+python main.py --debug
+```
+
 ## Future Plans
 
 1. Data Analysis Tools

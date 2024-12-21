@@ -42,7 +42,7 @@ class CryptoDataCollector:
         self.min_trades = config.get('validation', {}).get('min_trades', self.DEFAULT_MIN_TRADES)
         self.min_volume = config.get('validation', {}).get('min_volume', self.DEFAULT_MIN_VOLUME)
         
-        self.quality_monitor = DataQualityMonitor(self.db)
+        self.quality_monitor = None  # Will be set via set_quality_monitor
         self.initialization_done = defaultdict(lambda: defaultdict(bool))
         
         self.timeframes = {
@@ -118,6 +118,10 @@ class CryptoDataCollector:
             'min_trades': int(base_trades * multiplier),
             'min_volume': base_volume * multiplier
         }
+    
+    def set_quality_monitor(self, monitor):
+        """Set the data quality monitor"""
+        self.quality_monitor = monitor
     
     async def start_collection(self):
         """Start the collection process"""
@@ -336,6 +340,9 @@ class CryptoDataCollector:
 
     async def validate_ohlcv_data(self, data, symbol=None):
         """Validate OHLCV (klines) data before saving to database"""
+        if not self.quality_monitor:
+            raise RuntimeError("Quality monitor not initialized. Call set_quality_monitor first.")
+        
         try:
             timestamp = int(data[0])
             open_price = float(data[1])

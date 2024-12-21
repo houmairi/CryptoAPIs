@@ -1,5 +1,6 @@
 import asyncio
 from src.collector import CryptoDataCollector
+from src.data_quality import DataQualityMonitor
 from config import config
 import logging
 import signal
@@ -10,14 +11,19 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 class CryptoDataService:
-    def __init__(self):
+    def __init__(self, debug_mode=False):
         """Initialize the service with configuration"""
         self.running = False
+        self.debug_mode = debug_mode
         self.collector = CryptoDataCollector(config)
+        # Initialize DataQualityMonitor with debug mode option
+        self.monitor = DataQualityMonitor(self.collector.db, debug_quick_baseline=debug_mode)
+        # Pass monitor to collector
+        self.collector.set_quality_monitor(self.monitor)
         
     async def start(self):
         self.running = True
-        logger.info("Starting Crypto Data Service")
+        logger.info(f"Starting Crypto Data Service in {'debug' if self.debug_mode else 'normal'} mode")
         
         try:
             # Set up platform-specific signal handling
@@ -78,7 +84,9 @@ class CryptoDataService:
                 logger.info("Service shutdown complete")
 
 def main():
-    service = CryptoDataService()
+    # You can enable debug mode by passing an argument
+    debug_mode = '--debug' in sys.argv
+    service = CryptoDataService(debug_mode=debug_mode)
     try:
         asyncio.run(service.start())
     except KeyboardInterrupt:
