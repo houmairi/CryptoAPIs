@@ -53,6 +53,17 @@ CREATE TABLE IF NOT EXISTS ohlcv_data (
     UNIQUE(coin_id, timestamp, timeframe)
 );
 
+CREATE TABLE IF NOT EXISTS invalid_data (
+    id SERIAL PRIMARY KEY,
+    symbol VARCHAR(20) NOT NULL,
+    data_type VARCHAR(20) NOT NULL,
+    timeframe VARCHAR(10),
+    raw_data JSONB NOT NULL,
+    error_message TEXT NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+
 -- Create indexes
 CREATE INDEX IF NOT EXISTS idx_price_ticks_timestamp ON price_ticks(timestamp);
 CREATE INDEX IF NOT EXISTS idx_price_ticks_coin_timestamp ON price_ticks(coin_id, timestamp);

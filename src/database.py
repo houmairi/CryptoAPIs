@@ -4,6 +4,7 @@ from datetime import datetime
 import logging
 import asyncio
 import os
+import json
 
 class DatabaseHandler:
     def __init__(self, config):
@@ -94,6 +95,79 @@ class DatabaseHandler:
         except Exception as e:
             self.logger.error(f"Error getting/creating coin: {e}")
             raise
+        
+    async def get_recent_ohlcv_data(self, symbol, timeframe, limit=5):
+        """Get recent OHLCV data for calculating dynamic thresholds"""
+        try:
+            def db_operation():
+                self.connect()
+                with self.conn.cursor() as cur:
+                    # Get coin_id first
+                    clean_symbol = symbol.replace('USDT', '')
+                    cur.execute("""
+                        SELECT timestamp, volume, num_trades as trades
+                        FROM ohlcv_data od
+                        JOIN coins c ON od.coin_id = c.id
+                        WHERE c.symbol = %s AND timeframe = %s
+                        ORDER BY timestamp DESC
+                        LIMIT %s
+                    """, (clean_symbol, timeframe, limit))
+                    
+                    rows = cur.fetchall()
+                    # Convert to list of dicts
+                    columns = ['timestamp', 'volume', 'trades']
+                    return [dict(zip(columns, row)) for row in rows]
+
+            # Run database operation in a thread pool
+            loop = asyncio.get_event_loop()
+            result = await loop.run_in_executor(None, db_operation)
+            return result
+
+        except Exception as e:
+            self.logger.error(f"Error getting recent OHLCV data: {e}")
+            return []
+        
+    async def get_ohlcv_data(self, symbol: str, timeframe: str, start_date=None):
+        """Get OHLCV data for a specific symbol and timeframe"""
+        try:
+            def db_operation():
+                self.connect()
+                with self.conn.cursor() as cur:
+                    clean_symbol = symbol.replace('USDT', '')
+                    query = """
+                        SELECT 
+                            od.timestamp,
+                            od.open_price,
+                            od.high_price,
+                            od.low_price,
+                            od.close_price,
+                            od.volume,
+                            od.num_trades
+                        FROM ohlcv_data od
+                        JOIN coins c ON od.coin_id = c.id
+                        WHERE c.symbol = %s 
+                        AND od.timeframe = %s
+                    """
+                    params = [clean_symbol, timeframe]
+                    
+                    if start_date:
+                        query += " AND od.timestamp >= %s"
+                        params.append(start_date)
+                        
+                    query += " ORDER BY od.timestamp DESC"
+                    
+                    cur.execute(query, params)
+                    columns = ['timestamp', 'open', 'high', 'low', 'close', 'volume', 'num_trades']
+                    return [dict(zip(columns, row)) for row in cur.fetchall()]
+                    
+            # Run database operation in thread pool
+            loop = asyncio.get_event_loop()
+            result = await loop.run_in_executor(None, db_operation)
+            return result
+            
+        except Exception as e:
+            self.logger.error(f"Error getting OHLCV data: {e}")
+            return []
 
     async def save_ticker_data(self, data, source):
         """Async wrapper for database operations"""
@@ -189,7 +263,7 @@ class DatabaseHandler:
             raise
         
     async def save_ohlcv_data(self, symbol, timeframe, data):
-        """Save OHLCV data to database"""
+        """Save OHLCV data to database with additional checks"""
         try:
             if not data or len(data) == 0:
                 self.logger.warning(f"No OHLCV data received for {symbol} {timeframe}")
@@ -199,8 +273,34 @@ class DatabaseHandler:
             
             def db_operation():
                 coin_id = self.get_or_create_coin(symbol)
+                timestamp = datetime.fromtimestamp(kline[0]/1000)
                 
+                # Add check for existing data
                 with self.conn.cursor() as cur:
+                    # First check if we already have data for this timestamp and timeframe
+                    cur.execute("""
+                        SELECT volume, num_trades 
+                        FROM ohlcv_data 
+                        WHERE coin_id = %s 
+                        AND timestamp = %s 
+                        AND timeframe = %s
+                    """, (coin_id, timestamp, timeframe))
+                    
+                    existing = cur.fetchone()
+                    if existing:
+                        # Compare with existing data
+                        existing_volume, existing_trades = existing
+                        new_volume = float(kline[5])
+                        new_trades = int(kline[8])
+                        
+                        if existing_volume == new_volume and existing_trades == new_trades:
+                            self.logger.warning(
+                                f"Duplicate data detected for {symbol} {timeframe} at {timestamp}. "
+                                f"Existing volume: {existing_volume}, new volume: {new_volume}. "
+                                f"Existing trades: {existing_trades}, new trades: {new_trades}"
+                            )
+                    
+                    # Insert or update the data
                     cur.execute("""
                         INSERT INTO ohlcv_data (
                             coin_id, timestamp, timeframe, open_price, high_price,
@@ -216,7 +316,7 @@ class DatabaseHandler:
                             num_trades = EXCLUDED.num_trades
                     """, (
                         coin_id,
-                        datetime.fromtimestamp(kline[0]/1000),  # Open time
+                        timestamp,
                         timeframe,
                         float(kline[1]),  # Open
                         float(kline[2]),  # High
@@ -228,7 +328,33 @@ class DatabaseHandler:
             
             loop = asyncio.get_event_loop()
             await loop.run_in_executor(None, db_operation)
-            
+                
         except Exception as e:
             self.logger.error(f"Error saving OHLCV data: {e}")
+            raise
+        
+    async def save_invalid_data(self, symbol, data_type, timeframe, data, error_message):
+        """Save invalid data to a separate table for analysis"""
+        try:
+            def db_operation():
+                self.connect()
+                with self.conn.cursor() as cur:
+                    cur.execute("""
+                        INSERT INTO invalid_data 
+                        (symbol, data_type, timeframe, raw_data, error_message)
+                        VALUES (%s, %s, %s, %s, %s)
+                    """, (
+                        symbol,
+                        data_type,
+                        timeframe,
+                        psycopg2.extras.Json(data),  # Convert dict to JSONB
+                        error_message
+                    ))
+            
+            # Run database operation in thread pool
+            loop = asyncio.get_event_loop()
+            await loop.run_in_executor(None, db_operation)
+                
+        except Exception as e:
+            self.logger.error(f"Error saving invalid data: {e}")
             raise
