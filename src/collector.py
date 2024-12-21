@@ -2,6 +2,7 @@ import asyncio
 import aiohttp
 import time
 from datetime import datetime
+from datetime import timedelta
 import logging
 from src.database import DatabaseHandler
 import random
@@ -166,39 +167,42 @@ class CryptoDataCollector:
                 return False
 
     async def continuous_collection(self):
-        """Continuous collection with proper interval handling"""
-        # Test connection first
+        """Continuous collection synchronized to minute marks"""
         if not await self.test_connection():
             self.logger.error("Failed to establish connection. Exiting...")
             return
 
+        # Initial synchronization to next minute mark
+        now = datetime.now()
+        next_minute = now.replace(second=0, microsecond=0) + timedelta(minutes=1)
+        wait_seconds = (next_minute - now).total_seconds()
+        
+        if wait_seconds > 0:
+            self.logger.info(f"Initial synchronization to next minute mark ({wait_seconds:.2f} seconds)...")
+            await asyncio.sleep(wait_seconds)
+
         while self.running:
             try:
+                start_time = datetime.now()
                 tasks = []
                 
-                # Collect ticker data first
+                # Collect data
                 for symbol in self.config['collection']['symbols']:
-                    symbol_pair = self.validate_symbol(symbol)
                     tasks.append(asyncio.create_task(self.collect_ticker_data(symbol)))
-                
-                # Then collect OHLCV data
-                for symbol in self.config['collection']['symbols']:
                     for timeframe in self.timeframes:
                         tasks.append(asyncio.create_task(
                             self.collect_klines_data(symbol, timeframe)
                         ))
-                
+
                 # Execute all tasks
                 results = await asyncio.gather(*tasks, return_exceptions=True)
                 
-                # Handle any exceptions
-                for result in results:
-                    if isinstance(result, Exception):
-                        self.logger.error(f"Task error: {result}")
+                # Calculate time taken and adjust sleep to hit next minute mark precisely
+                collection_time = (datetime.now() - start_time).total_seconds()
+                sleep_time = max(0, 60 - collection_time)
                 
-                # Add jitter to avoid exactly synchronized requests
-                jitter = random.uniform(-0.1, 0.1)
-                await asyncio.sleep(60 + jitter)
+                self.logger.debug(f"Collection took {collection_time:.2f}s, sleeping for {sleep_time:.2f}s")
+                await asyncio.sleep(sleep_time)
                 
             except asyncio.CancelledError:
                 break
